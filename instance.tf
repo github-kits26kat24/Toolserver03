@@ -7,6 +7,5 @@ resource "aws_instance" "Tool-Server" {
  tags = {
     Name        = "Tool-Server"
     Environment = "wip"
-    Department  = "IT"
   }
 }
