@@ -1,0 +1,7 @@
+someapps:
+  - git
+  - docker
+
+someservices: []
+
+statelevel: started

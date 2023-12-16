@@ -1,11 +1,14 @@
+# Create a AWS Plugin
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.0"
     }
   }
 }
+
+# Configure the AWS Provider
 provider "aws" {
   region = "eu-west-1"
 }

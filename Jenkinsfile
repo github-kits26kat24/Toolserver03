@@ -1,32 +1,73 @@
  pipeline {
     agent any 
-    environment  {
-                AWS_ACCESS_KEY = credentials ('AWS_ACCESS_KEY')
-                AWS_SECRET_ACCESS_KEY = credentials ('AWS_SECRET_ACCESS_KEY')
-                AWS_REGION = 'eu-west-1'
-    }
-    stages {
-        stage ('terraform validate') {
-            steps  {
-                echo 'about to perform code validation'
-                sh 'terraform init'
-                sh 'terraform validate'
-            }
-        }
-        stage ('terraform plan') {
-            steps  {
-                echo 'about to perform terraform plan'
-                sh 'terraform plan'
-            }
-        }
-        stage ('terraform apply') {
-            steps  {
-                echo 'about to perform terraform apply....'
-                sh 'terraform apply -auto-approve'
-            }
-        }
+        
+    environment {
+        myuser = credentials ('dockerhub-user')
+        mypassword = credentials ('dockerhub-password')
+
+        POSTGRES_HOST = credentials ('POSTGRES_HOST')
+        POSTGRES_PASSWORD = credentials ('POSTGRES_PASSWORD')
+        AWS_ACCESS_KEY_ID = credentials ('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials ('AWS_SECRET_ACCESS_KEY')
+        AWS_REGION = 'eu-west-1'
+        version = "v3"
+        keyfile = credentials ('keyfile')
+
     }
     
+    stages {
+       stage ("download code") {
+         steps {
+            sh '''
+            git clone https://github.com/mzmarci/HR_APP.git
+           
+            '''
+         }
+       }
+    
+       stage ("build image") {
+         steps {
+            sh '''
+                  cd HR_APP
+                  docker build -t mzmarci/hrapp:$version .
+               '''   
+         }
+       }
+    
+       stage ("publish image") {
+         steps {
+            sh '''
+                  docker login -u $myuser -p $mypassword
+                  docker push mzmarci/hrapp:$version
+                '''
+         }
+       }       
+    
+       stage ("Build image") {
+         steps {
+            sh '''
+               ls
+                # docker run --name hrapp  --rm -d -p 5000:5000 mzmarci/hrapp:$version
+               '''
+         }
+       }
+           
+    
+       stage ("Run ansible") {
+         steps {
+            sh '''
+                 cd HR_APP
+                 cd Ansible
+                 pwd 
+                 ls
+                 ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i inventory --key-file $keyfile playbook.yml -u ec2-user
+                 ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i inventory  --key-file $keyfile playbookA.yml -u ec2-user 
+               '''
+         }
+       }
+
+    }
+
     post {
         always  {
             echo ' i just ran a pipleine'

@@ -10,7 +10,7 @@ resource "aws_route_table_association" "ass1" {
   subnet_id = aws_subnet.public_subnet_Tool-Server.id
 
   # The ID of the routing table to associate with.
-  route_table_id = aws_route_table.public.id 
+  route_table_id = aws_route_table.public.id
 }
 
 # resource "aws_route_table_association" "ass2" {
