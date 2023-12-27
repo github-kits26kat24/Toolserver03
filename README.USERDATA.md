@@ -1,3 +1,18 @@
+# sudo yum install -y yum-utils
+# sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+# sudo yum -y install terraform
+
+# sudo yum install java-11-amazon-corretto-headless
+# sudo yum install git
+
+# sudo yum install maven
+
+# sudo yum install docker
+# sudo systemctl start docker 
+# sudo systemctl status docker
+# sudo usermod -aG docker ec2-user
+
+
 user_data     = <<EOF
 #!/bin/bash
 sudo yum install git
@@ -5,9 +20,8 @@ EOF
 
 user_data     = <<EOF
 #!/bin/bash
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo yum-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo yum update && sudo apt-get install terraform
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
 EOF
 
 user_data     = <<EOF
@@ -30,11 +44,18 @@ EOF
 
 user_data     = <<EOF
 #!/bin/bash
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
-sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
-sudo yum update
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+sudo yum upgrade
+# Add required dependencies for the jenkins package
+sudo yum install java-11-amazon-corretto-headless
 sudo yum install jenkins
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
 EOF
+
 
 
  user_data     = <<EOF
